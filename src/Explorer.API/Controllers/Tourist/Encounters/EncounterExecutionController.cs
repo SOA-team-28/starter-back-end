@@ -5,6 +5,7 @@ using Explorer.Encounters.Core.Domain.Encounters;
 using Explorer.Stakeholders.Infrastructure.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+
 using Newtonsoft.Json;
 using System.Net.Http;
 using System.Text;
@@ -23,18 +24,22 @@ namespace Explorer.API.Controllers.Tourist.Encounters
         private readonly IEncounterExecutionService _encounterExecutionService;
         private readonly IEncounterService _encounterService;
         private readonly HttpClient _httpClient;
+
         public EncounterExecutionController(IEncounterExecutionService encounterExecutionService, IEncounterService encounterService)
         {
             _encounterExecutionService = encounterExecutionService;
             _encounterService = encounterService;
-            _httpClient = new HttpClient();     
+            _httpClient = new HttpClient();
+
         }
 
         [HttpGet("{id:int}")]
         public ActionResult<EncounterDto> GetById([FromRoute] int id)
         {
+            
             var result = _encounterExecutionService.Get(id);
             return CreateResponse(result);
+            
         }
 
         [HttpPut]
@@ -44,11 +49,95 @@ namespace Explorer.API.Controllers.Tourist.Encounters
             return CreateResponse(result);
         }
 
-        [HttpPut("activate/{id:int}")]
-        public ActionResult<EncounterExecutionDto> Activate([FromRoute] int id, [FromForm] double touristLatitude, [FromForm] double touristLongitude)
+        [HttpPut("activate/{chId:int}")]
+        public async Task< ActionResult<EncounterExecutionDto>> Activate([FromRoute] int chId, [FromBody] int touristId)
         {
-            var result = _encounterExecutionService.Activate(User.PersonId(), touristLatitude, touristLongitude, id);
+            /*
+           // var result = _encounterExecutionService.Activate(User.PersonId(), touristLatitude, touristLongitude, id);
             return CreateResponse(result);
+            */
+            //DOBAVI ENCOUNTER PREKO CHID
+            EncounterDto retrievedEncounter = new EncounterDto();
+            var microserviceUrl = "http://localhost:8082";
+
+            try
+            {
+                // Napravite HTTP GET zahtjev ka mikroservisu za dobavljanje encounter-a po ID-u
+                var response = await _httpClient.GetAsync($"{microserviceUrl}/encounters/getByCheckPoint/{chId}");
+
+                // Provjerite odgovor
+                if (response.IsSuccessStatusCode)
+                {
+                    // Ukoliko je odgovor uspješan, izvucite podatke iz odgovora
+                    var jsonString = await response.Content.ReadAsStringAsync();
+                     retrievedEncounter = JsonConvert.DeserializeObject<EncounterDto>(jsonString);
+
+                   
+                    
+                }
+                else
+                {
+                    // Ukoliko je odgovor neuspješan, obradite grešku na odgovarajući način
+                    Console.WriteLine($"HTTP request failed with status code {response.StatusCode}");
+                    return null; // Vratite null ili neku drugu indikaciju da je dobavljanje encounter-a neuspješno
+                }
+            }
+            catch (Exception ex)
+            {
+                // Uhvatite i obradite izuzetak ako se desi
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                return null; // Vratite null ili neku drugu indikaciju o grešci
+            }
+
+
+
+
+
+
+            EncounterExecutionDto encExecutionDto = new EncounterExecutionDto();
+       
+            encExecutionDto.StartTime=DateTime.Now;
+            encExecutionDto.TouristId = touristId;
+          encExecutionDto.Status = "Active";
+            encExecutionDto.EncounterId = retrievedEncounter.Id;
+           // encExecutionDto.EncounterDto.CheckPointId = chId;
+           // var microserviceUrl = "http://localhost:8082";
+
+
+            try
+            {
+                // Serijalizujte EncounterDto objekat u JSON format
+                var jsonContent = JsonConvert.SerializeObject(encExecutionDto);
+
+                // Kreirajte HTTP zahtjev sa JSON sadržajem
+                var httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+
+                // Kreirajte StringContent objekat sa potrebnim enkodingom i MIME tipom
+
+                // Pošaljite HTTP POST zahtjev ka Go mikroservisu
+                var response = await _httpClient.PostAsync($"{microserviceUrl}/executions/activate", httpContent);
+
+                // Provjerite odgovor
+                if (response.IsSuccessStatusCode)
+                {
+                    Console.WriteLine($"HTTP status successfull {response.StatusCode}");
+                    return encExecutionDto;
+                }
+                else
+                {
+                    // Ukoliko je odgovor neuspješan, obradite grešku na odgovarajući način
+                    Console.WriteLine($"HTTP request failed with status code {response.StatusCode}");
+                    return encExecutionDto;
+
+                }
+            }
+            catch (Exception ex)
+            {
+                // Uhvatite i obradite izuzetak ako se desi
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                return encExecutionDto;
+
+            }
         }
 
         [HttpPut("completed/{id:int}")]
@@ -119,15 +208,53 @@ namespace Explorer.API.Controllers.Tourist.Encounters
             var result = _encounterExecutionService.GetAllCompletedByTourist(User.PersonId(), page, pageSize);
             return CreateResponse(result);
         }
+
+        
+        [HttpGet("get-by-tour/{chId:int}")]
+        public async Task<ActionResult<EncounterExecutionDto>> GetByTour([FromRoute] int chId)
         */
 
         [HttpGet("get-by-tour/{id:int}")]
         public ActionResult<EncounterExecutionDto> GetByTour([FromRoute] int id, [FromQuery] double touristLatitude, [FromQuery] double touristLongitude)
         {
+            /*
             var result = _encounterExecutionService.GetVisibleByTour(id, touristLongitude, touristLatitude, User.PersonId());
             if(result.IsSuccess)
                 result = _encounterService.AddEncounter(result.Value);
             return CreateResponse(result);
+            */
+
+            var microserviceUrl = "http://localhost:8082";
+
+            try
+            {
+                // Napravite HTTP GET zahtjev ka mikroservisu za dobavljanje encounter-a po ID-u
+                var response = await _httpClient.GetAsync($"{microserviceUrl}/executions/getByCheckPoint/{chId}");
+
+                // Provjerite odgovor
+                if (response.IsSuccessStatusCode)
+                {
+                    // Ukoliko je odgovor uspješan, izvucite podatke iz odgovora
+                    var jsonString = await response.Content.ReadAsStringAsync();
+                    var retrievedEncounter = JsonConvert.DeserializeObject<EncounterExecutionDto>(jsonString);
+
+                    Console.WriteLine($"EncounterExecution retrieved successfully. ID: {retrievedEncounter}");
+                    return retrievedEncounter;
+                }
+                else
+                {
+                    // Ukoliko je odgovor neuspješan, obradite grešku na odgovarajući način
+                    Console.WriteLine($"HTTP request failed with status code {response.StatusCode}");
+                    return null; // Vratite null ili neku drugu indikaciju da je dobavljanje encounter-a neuspješno
+                }
+            }
+            catch (Exception ex)
+            {
+                // Uhvatite i obradite izuzetak ako se desi
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                return null; // Vratite null ili neku drugu indikaciju o grešci
+            }
+
         }
 
         [HttpGet("social/checkRange/{id:int}/{tourId:int}")]

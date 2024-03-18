@@ -2,10 +2,12 @@
 using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.Encounters.API.Dtos;
 using Explorer.Encounters.API.Public;
+using Explorer.Encounters.Core.Domain.Encounters;
 using Explorer.Stakeholders.Infrastructure.Authentication;
 using Explorer.Tours.API.Dtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+
 using System.Net.Http;
 using System.Text;
 
@@ -94,21 +96,8 @@ namespace Explorer.API.Controllers.Author.Administration
             }
         }
 
-        /*
-        [HttpPost]
-        public ActionResult<EncounterDto> Create([FromForm] EncounterDto encounter,[FromQuery] long checkpointId, [FromQuery] bool isSecretPrerequisite, [FromForm] List<IFormFile>? imageF = null)
-        {
-
-            if (imageF != null && imageF.Any())
-            {
-                var imageNames = _imageService.UploadImages(imageF);
-                if (encounter.Type =="Location")
-                    encounter.Image = imageNames[0];
-            }
-
-            var result = _encounterService.Create(encounter, checkpointId, isSecretPrerequisite,User.PersonId());
-            return CreateResponse(result);
-        }*/
+    
+     
 
         [HttpPut]
         public ActionResult<EncounterDto> Update([FromForm] EncounterDto encounter, [FromForm] List<IFormFile>? imageF = null)
@@ -133,10 +122,44 @@ namespace Explorer.API.Controllers.Author.Administration
         }
 
         [HttpGet("{id:int}")]
-        public ActionResult<EncounterDto> GetById(int id)
+        public async Task<ActionResult<EncounterDto>> GetById(int id)
         {
+            /*
             var result = _encounterService.Get(id);
             return CreateResponse(result);
+
+            */
+            var microserviceUrl = "http://localhost:8082";
+            try
+            {
+                // Napravite HTTP GET zahtjev ka mikroservisu za dobavljanje encounter-a po ID-u
+                var response = await _httpClient.GetAsync($"{microserviceUrl}/encounters/getById/{id}");
+
+                // Provjerite odgovor
+                if (response.IsSuccessStatusCode)
+                {
+                    // Ukoliko je odgovor uspješan, izvucite podatke iz odgovora
+                    var jsonString = await response.Content.ReadAsStringAsync();
+                    var retrievedEncounter = JsonConvert.DeserializeObject<EncounterDto>(jsonString);
+
+                    Console.WriteLine($"Encounter retrieved successfully. ID: {retrievedEncounter.Id}");
+                    return retrievedEncounter;
+                }
+                else
+                {
+                    // Ukoliko je odgovor neuspješan, obradite grešku na odgovarajući način
+                    Console.WriteLine($"HTTP request failed with status code {response.StatusCode}");
+                    return null; // Vratite null ili neku drugu indikaciju da je dobavljanje encounter-a neuspješno
+                }
+            }
+            catch (Exception ex)
+            {
+                // Uhvatite i obradite izuzetak ako se desi
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                return null; // Vratite null ili neku drugu indikaciju o grešci
+            }
+
+
         }
 
     }
