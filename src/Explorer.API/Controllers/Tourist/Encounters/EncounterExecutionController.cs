@@ -45,20 +45,59 @@ namespace Explorer.API.Controllers.Tourist.Encounters
             return CreateResponse(result);
         }
 
-        [HttpPut("activate/{encounterId:int}")]
-        public async Task< ActionResult<EncounterExecutionDto>> Activate([FromRoute] int encounterId, [FromBody] int touristId)
+        [HttpPut("activate/{chId:int}")]
+        public async Task< ActionResult<EncounterExecutionDto>> Activate([FromRoute] int chId, [FromBody] int touristId)
         {
             /*
            // var result = _encounterExecutionService.Activate(User.PersonId(), touristLatitude, touristLongitude, id);
             return CreateResponse(result);
             */
+            //DOBAVI ENCOUNTER PREKO CHID
+            EncounterDto retrievedEncounter = new EncounterDto();
+            var microserviceUrl = "http://localhost:8082";
+
+            try
+            {
+                // Napravite HTTP GET zahtjev ka mikroservisu za dobavljanje encounter-a po ID-u
+                var response = await _httpClient.GetAsync($"{microserviceUrl}/encounters/getByCheckPoint/{chId}");
+
+                // Provjerite odgovor
+                if (response.IsSuccessStatusCode)
+                {
+                    // Ukoliko je odgovor uspješan, izvucite podatke iz odgovora
+                    var jsonString = await response.Content.ReadAsStringAsync();
+                     retrievedEncounter = JsonConvert.DeserializeObject<EncounterDto>(jsonString);
+
+                   
+                    
+                }
+                else
+                {
+                    // Ukoliko je odgovor neuspješan, obradite grešku na odgovarajući način
+                    Console.WriteLine($"HTTP request failed with status code {response.StatusCode}");
+                    return null; // Vratite null ili neku drugu indikaciju da je dobavljanje encounter-a neuspješno
+                }
+            }
+            catch (Exception ex)
+            {
+                // Uhvatite i obradite izuzetak ako se desi
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                return null; // Vratite null ili neku drugu indikaciju o grešci
+            }
+
+
+
+
+
 
             EncounterExecutionDto encExecutionDto = new EncounterExecutionDto();
-            encExecutionDto.EncounterId = encounterId;
+       
             encExecutionDto.StartTime=DateTime.Now;
             encExecutionDto.TouristId = touristId;
-            encExecutionDto.Status = "Active";
-            var microserviceUrl = "http://localhost:8082";
+          encExecutionDto.Status = "Active";
+            encExecutionDto.EncounterId = retrievedEncounter.Id;
+           // encExecutionDto.EncounterDto.CheckPointId = chId;
+           // var microserviceUrl = "http://localhost:8082";
 
 
             try
