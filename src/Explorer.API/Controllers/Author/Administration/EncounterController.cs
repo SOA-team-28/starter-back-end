@@ -7,9 +7,16 @@ using Explorer.Stakeholders.Infrastructure.Authentication;
 using Explorer.Tours.API.Dtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
+
 using System.Net.Http;
 using System.Text;
+
+using Newtonsoft.Json;
+using System.Net.Http;
+using System.Net.Http.Json;
+using System.Threading.Tasks;
+using Azure;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
 namespace Explorer.API.Controllers.Author.Administration
 {
@@ -31,10 +38,10 @@ namespace Explorer.API.Controllers.Author.Administration
             _httpClient = new HttpClient();
 
         }
-
+        
 
         [HttpPost]
-        public async Task<ActionResult<EncounterDto>> Create([FromForm] EncounterDto encounter,[FromQuery] int checkpointId, [FromQuery] bool isSecretPrerequisite, [FromForm] List<IFormFile>? imageF = null)
+        public async Task<ActionResult<Boolean>> Create([FromForm] EncounterDto encounter, [FromQuery] int checkpointId, [FromQuery] bool isSecretPrerequisite, [FromForm] List<IFormFile>? imageF = null)
         {
             /*
 
@@ -48,9 +55,12 @@ namespace Explorer.API.Controllers.Author.Administration
             var result = _encounterService.Create(encounter, checkpointId, isSecretPrerequisite,User.PersonId());
             return CreateResponse(result);
             */
-            encounter.CheckPointId = checkpointId;
-            var microserviceUrl = "http://localhost:8082";
 
+            Console.WriteLine($"Objekat sa fronta {encounter}");
+
+            encounter.CheckPointId = checkpointId;
+
+            var microserviceUrl = "http://localhost:8082";
 
             try
             {
@@ -60,8 +70,6 @@ namespace Explorer.API.Controllers.Author.Administration
                 // Kreirajte HTTP zahtjev sa JSON sadržajem
                 var httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
-                // Kreirajte StringContent objekat sa potrebnim enkodingom i MIME tipom
-
                 // Pošaljite HTTP POST zahtjev ka Go mikroservisu
                 var response = await _httpClient.PostAsync($"{microserviceUrl}/encounters", httpContent);
 
@@ -69,13 +77,13 @@ namespace Explorer.API.Controllers.Author.Administration
                 if (response.IsSuccessStatusCode)
                 {
                     Console.WriteLine($"HTTP status successfull {response.StatusCode}");
-                    return encounter;
+                    return true;
                 }
                 else
                 {
                     // Ukoliko je odgovor neuspješan, obradite grešku na odgovarajući način
                     Console.WriteLine($"HTTP request failed with status code {response.StatusCode}");
-                    return encounter;
+                    return false;
 
                 }
             }
@@ -83,10 +91,13 @@ namespace Explorer.API.Controllers.Author.Administration
             {
                 // Uhvatite i obradite izuzetak ako se desi
                 Console.WriteLine($"An error occurred: {ex.Message}");
-                return encounter;
+                return false;
 
             }
         }
+
+    
+     
 
         [HttpPut]
         public ActionResult<EncounterDto> Update([FromForm] EncounterDto encounter, [FromForm] List<IFormFile>? imageF = null)
@@ -95,8 +106,8 @@ namespace Explorer.API.Controllers.Author.Administration
             if (imageF != null && imageF.Any())
             {
                 var imageNames = _imageService.UploadImages(imageF);
-                if (encounter.Type == "Location")
-                    encounter.Image = imageNames[0];
+                if (encounter.Type == "Location") ;
+                   // encounter.Image = imageNames[0];
             }
 
             var result = _encounterService.Update(encounter,User.PersonId());

@@ -286,14 +286,15 @@ namespace Explorer.Encounters.Core.UseCases
                 encounter.Value.RequiredPeople = socialEncounter.RequiredPeople;
                 encounter.Value.Range = socialEncounter.Range;
                // encounter.Value.ActiveTouristsIds = socialEncounter.ActiveTouristsIds;
+
             }
             else if (_hiddenLocationEncounterRepository.Get(encounterId) != null)
             {
                 var hiddenLocationEncounter = _hiddenLocationEncounterRepository.Get(encounterId);
-                encounter.Value.LocationLongitude = hiddenLocationEncounter.LocationLongitude;
-                encounter.Value.LocationLatitude = hiddenLocationEncounter.LocationLatitude;
-                encounter.Value.Image = hiddenLocationEncounter.Image;
-                encounter.Value.Range = hiddenLocationEncounter.Range;
+               // encounter.Value.LocationLongitude = hiddenLocationEncounter.LocationLongitude;
+                //encounter.Value.LocationLatitude = hiddenLocationEncounter.LocationLatitude;
+                //encounter.Value.Image = hiddenLocationEncounter.Image;
+                //encounter.Value.Range = hiddenLocationEncounter.Range;
             }
 
             return encounter;
