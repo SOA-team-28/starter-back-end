@@ -16,6 +16,7 @@
         public string? Image { get; set; }
         public double? Range { get; set; }
         public int? RequiredPeople { get; set; }
-        public List<int>? ActiveTouristsIds { get; set; }
+        public int CheckPointId { get; set; }
+      //  public List<int>? ActiveTouristsIds { get; set; }
     }
 }

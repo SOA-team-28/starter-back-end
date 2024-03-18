@@ -188,7 +188,7 @@ namespace Explorer.Encounters.Core.UseCases
         {
             try
             {
-                execution.EncounterDto = MapToDto(_encounterRepository.Get(execution.EncounterId));
+            //    execution.EncounterDto = MapToDto(_encounterRepository.Get(execution.EncounterId));
                 return execution;
             }
             catch (KeyNotFoundException e)
@@ -202,7 +202,7 @@ namespace Explorer.Encounters.Core.UseCases
             {
                 foreach(var execution in executions)
                 {
-                    execution.EncounterDto = MapToDto(_encounterRepository.Get(execution.EncounterId));
+               //     execution.EncounterDto = MapToDto(_encounterRepository.Get(execution.EncounterId));
                 }
                 return executions;
             }
@@ -285,7 +285,7 @@ namespace Explorer.Encounters.Core.UseCases
                 var socialEncounter = _socialEncounterRepository.Get(encounterId);
                 encounter.Value.RequiredPeople = socialEncounter.RequiredPeople;
                 encounter.Value.Range = socialEncounter.Range;
-                encounter.Value.ActiveTouristsIds = socialEncounter.ActiveTouristsIds;
+               // encounter.Value.ActiveTouristsIds = socialEncounter.ActiveTouristsIds;
             }
             else if (_hiddenLocationEncounterRepository.Get(encounterId) != null)
             {
