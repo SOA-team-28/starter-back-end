@@ -84,7 +84,7 @@ public class AuthenticationService : IAuthenticationService
             else { userRole = Domain.UserRole.Tourist; }
 
             account.Password = _passwordHasher.HashPassword(account.Password);
-            var newUser = new User(account.Username, account.Password, userRole, true, false);
+            var newUser = new User(account.Username, account.Password, userRole, true, true);
 
             if (newUser.Role == Domain.UserRole.Tourist)
             {
@@ -101,7 +101,7 @@ public class AuthenticationService : IAuthenticationService
 
             _verificationTokenRepository.CreateVerificationToken(user.Id);
             var token = _verificationTokenRepository.GetByUserId(user.Id);
-            _emailService.SendEmail(account, token.TokenData);
+            //_emailService.SendEmail(account, token.TokenData);
 
             return account;
         }

@@ -33,7 +33,7 @@ public class TourCommandTests: BaseToursIntegrationTest
         };
 
         // Act
-        var result = ((ObjectResult)controller.Create(newEntity).Result)?.Value as TourDto;
+        var result = ((ObjectResult)controller.CreateAsync(newEntity).Result)?.Value as TourDto;
 
         // Assert - Response
         result.ShouldNotBeNull();
@@ -60,7 +60,7 @@ public class TourCommandTests: BaseToursIntegrationTest
         };
 
         // Act
-        var result = (ObjectResult)controller.Create(updatedEntity).Result;
+        var result = (ObjectResult)controller.CreateAsync(updatedEntity).Result;
 
         // Assert
         result.ShouldNotBeNull();
