@@ -11,11 +11,15 @@
         public string Type { get; set; }
         public double Longitude { get; set; }
         public double Latitude { get; set; }
-        public double? LocationLongitude { get; set; }
-        public double? LocationLatitude { get; set; }
         public string? Image { get; set; }
         public double? Range { get; set; }
         public int? RequiredPeople { get; set; }
-        public List<int>? ActiveTouristsIds { get; set; }
+
+        public double? LocationLongitude { get; set; }
+        public double? LocationLatitude { get; set; }
+        public int CheckPointId { get; set; }
+
+        // public List<int>? ActiveTouristsIds { get; set; }
+
     }
 }

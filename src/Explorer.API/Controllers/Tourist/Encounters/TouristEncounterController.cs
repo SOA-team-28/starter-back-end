@@ -34,8 +34,8 @@ namespace Explorer.API.Controllers.Tourist.Encounters
             if (imageF != null && imageF.Any())
             {
                 var imageNames = _imageService.UploadImages(imageF);
-                if (encounter.Type == "Location")
-                    encounter.Image = imageNames[0];
+                if (encounter.Type == "Location") ;
+                    //encounter.Image = imageNames[0];
             }
 
             // Transformacija koordinata za longitude
@@ -57,8 +57,8 @@ namespace Explorer.API.Controllers.Tourist.Encounters
             if (imageF != null && imageF.Any())
             {
                 var imageNames = _imageService.UploadImages(imageF);
-                if (encounter.Type == "Location")
-                    encounter.Image = imageNames[0];
+                if (encounter.Type == "Location") ;
+                   // encounter.Image = imageNames[0];
             }
 
             var result = _encounterService.Update(encounter, User.PersonId());

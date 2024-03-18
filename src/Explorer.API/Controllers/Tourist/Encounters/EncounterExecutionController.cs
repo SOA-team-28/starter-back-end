@@ -1,9 +1,18 @@
 ﻿using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.Encounters.API.Dtos;
 using Explorer.Encounters.API.Public;
+using Explorer.Encounters.Core.Domain.Encounters;
 using Explorer.Stakeholders.Infrastructure.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using System.Net.Http;
+using System.Text;
+
+using System.Net.Http.Json;
+using System.Threading.Tasks;
+using Azure;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
 namespace Explorer.API.Controllers.Tourist.Encounters
 {
@@ -13,11 +22,12 @@ namespace Explorer.API.Controllers.Tourist.Encounters
     {
         private readonly IEncounterExecutionService _encounterExecutionService;
         private readonly IEncounterService _encounterService;
-
+        private readonly HttpClient _httpClient;
         public EncounterExecutionController(IEncounterExecutionService encounterExecutionService, IEncounterService encounterService)
         {
             _encounterExecutionService = encounterExecutionService;
             _encounterService = encounterService;
+            _httpClient = new HttpClient();     
         }
 
         [HttpGet("{id:int}")]
@@ -69,12 +79,48 @@ namespace Explorer.API.Controllers.Tourist.Encounters
         }
 
         [HttpGet("get-all-completed")]
+        public async Task<ActionResult<List<EncounterExecutionDto>>> GetAllCompletedByTourist([FromQuery] int page, [FromQuery] int pageSize)
+        {
+            var microserviceUrl = "http://localhost:8082"; // Adresa vašeg mikroservisa
+
+            try
+            {
+                // Napravite HTTP GET zahtjev ka mikroservisu
+                var response = await _httpClient.GetAsync($"{microserviceUrl}/executions/get-all-completed/2");
+
+                // Provjerite odgovor
+                if (response.IsSuccessStatusCode)
+                {
+                    // Ako je zahtjev uspješan, parsirajte odgovor i vratite rezultat
+                    var jsonString = await response.Content.ReadAsStringAsync();
+                    var result = JsonConvert.DeserializeObject<List<EncounterExecutionDto>>(jsonString);
+                    return result;
+                }
+                else
+                {
+                    // Ukoliko je odgovor neuspješan, obradite grešku na odgovarajući način
+                    Console.WriteLine($"HTTP request failed with status code {response.StatusCode}");
+                    return StatusCode((int)response.StatusCode); // Vratite odgovarajući status kod
+                }
+            }
+            catch (Exception ex)
+            {
+                // Uhvatite i obradite izuzetak ako se desi
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                return StatusCode(500); // Internal Server Error
+            }
+        }
+
+
+        /*
+        [HttpGet("get-all-completed")]
         public ActionResult<PagedResult<EncounterExecutionDto>> GetAllCompletedByTourist([FromQuery] int page, [FromQuery] int pageSize)
         {
             var result = _encounterExecutionService.GetAllCompletedByTourist(User.PersonId(), page, pageSize);
             return CreateResponse(result);
         }
-        
+        */
+
         [HttpGet("get-by-tour/{id:int}")]
         public ActionResult<EncounterExecutionDto> GetByTour([FromRoute] int id, [FromQuery] double touristLatitude, [FromQuery] double touristLongitude)
         {
