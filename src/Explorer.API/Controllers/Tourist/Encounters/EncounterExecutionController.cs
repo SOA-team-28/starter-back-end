@@ -183,6 +183,7 @@ namespace Explorer.API.Controllers.Tourist.Encounters
                     // Ako je zahtjev uspješan, parsirajte odgovor i vratite rezultat
                     var jsonString = await response.Content.ReadAsStringAsync();
                     var result = JsonConvert.DeserializeObject<List<EncounterExecutionDto>>(jsonString);
+                    Console.WriteLine(result);
                     return result;
                 }
                 else
@@ -214,8 +215,8 @@ namespace Explorer.API.Controllers.Tourist.Encounters
         public async Task<ActionResult<EncounterExecutionDto>> GetByTour([FromRoute] int chId)
         */
 
-        [HttpGet("get-by-tour/{id:int}")]
-        public ActionResult<EncounterExecutionDto> GetByTour([FromRoute] int id, [FromQuery] double touristLatitude, [FromQuery] double touristLongitude)
+        [HttpGet("get-by-tour/{chId:int}")]
+        public async Task<ActionResult<EncounterExecutionDto>> GetByTour([FromRoute] int chId)
         {
             /*
             var result = _encounterExecutionService.GetVisibleByTour(id, touristLongitude, touristLatitude, User.PersonId());
