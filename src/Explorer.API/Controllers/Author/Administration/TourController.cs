@@ -3,6 +3,7 @@ using Explorer.Encounters.Core.Domain.Encounters;
 using Explorer.Stakeholders.Infrastructure.Authentication;
 using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Public.Administration;
+using Explorer.Tours.Core.Domain.Tours;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
@@ -63,76 +64,175 @@ namespace Explorer.API.Controllers.Author.Administration
                 return StatusCode(500);
             }
         }
-
         [HttpPut("{id:int}")]
-        public ActionResult<TourDto> Update([FromBody] TourDto tour)
+        public async Task<ActionResult<TourDto>> Update([FromBody] TourDto tour, int id)
         {
-            tour.Equipment = new List<EquipmentDto>();
-            var result = _tourService.Update(tour, User.PersonId());
-            return CreateResponse(result);
+            try
+            {
+                var jsonContent = JsonConvert.SerializeObject(tour);
+                var httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+                var response = await _httpClient.PutAsync($"{microserviceUrl}/tours/{id}", httpContent);
+
+                // Check the response
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    try
+                    {
+                        var updatedTour = JsonConvert.DeserializeObject<TourDto>(responseContent);
+                        return Ok(updatedTour);
+                    }
+                    catch (JsonSerializationException ex)
+                    {
+                        Console.WriteLine($"Error deserializing JSON response: {ex.Message}");
+                        // Log or handle the deserialization error
+                        return StatusCode(500); // Return an appropriate status code
+                    }
+                }
+                else
+                {
+                    Console.WriteLine($"HTTP request failed with status code {response.StatusCode}");
+                    return StatusCode((int)response.StatusCode);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                return StatusCode(500);
+            }
         }
 
         [HttpDelete("{id:int}")]
-        public ActionResult Delete(int id)
+        public async Task<ActionResult> Delete(int id)
         {
-            var result = _tourService.Delete(id, User.PersonId());
-            return CreateResponse(result);
+            try
+            {
+                var response = await _httpClient.DeleteAsync($"{microserviceUrl}/tours/{id}");
+
+                // Check the response
+                if (response.IsSuccessStatusCode)
+                {
+                    return NoContent(); // 204 No Content
+                }
+                else
+                {
+                    Console.WriteLine($"HTTP request failed with status code {response.StatusCode}");
+                    return StatusCode((int)response.StatusCode);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                return StatusCode(500);
+            }
         }
 
         [HttpGet("by-author")]
-        public ActionResult<List<TourDto>> GetToursByAuthor([FromQuery] int page, [FromQuery] int pageSize)
+        public async Task<ActionResult<List<TourDto>>> GetToursByAuthor([FromQuery] int page, [FromQuery] int pageSize)
         {
-            var result = _tourService.GetToursByAuthor(page, pageSize, User.PersonId());
-            return CreateResponse(result);
+            try
+            {
+                var response = await _httpClient.GetAsync($"{microserviceUrl}/tours/by-author?page={page}&pageSize={pageSize}");
+
+                // Check the response
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    try
+                    {
+                        var tourList = JsonConvert.DeserializeObject<List<TourDto>>(responseContent);
+                        return Ok(tourList);
+                    }
+                    catch (JsonSerializationException ex)
+                    {
+                        Console.WriteLine($"Error deserializing JSON response: {ex.Message}");
+                        // Log or handle the deserialization error
+                        return StatusCode(500); // Return an appropriate status code
+                    }
+                }
+                else
+                {
+                    Console.WriteLine($"HTTP request failed with status code {response.StatusCode}");
+                    return StatusCode((int)response.StatusCode);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                return StatusCode(500);
+            }
         }
 
         [HttpGet]
         public ActionResult<PagedResult<TourDto>> GetAll([FromQuery] int page, [FromQuery] int pageSize)
         {
-            var result = _tourService.GetPaged(page, pageSize);
-            return CreateResponse(result);
+            return StatusCode(500);
         }
 
         [HttpPut("add/{tourId:int}/{equipmentId:int}")]
         public ActionResult<TourDto> AddEquipment(int tourId, int equipmentId)
         {
-            var result = _tourService.AddEquipment(tourId, equipmentId, User.PersonId());
-            return CreateResponse(result);
+            return StatusCode(500);
         }
 
         [HttpPut("remove/{tourId:int}/{equipmentId:int}")]
         public ActionResult<TourDto> RemoveEquipment(int tourId, int equipmentId)
         {
-            var result = _tourService.RemoveEquipment(tourId, equipmentId, User.PersonId());
-            return CreateResponse(result);
+            return StatusCode(500);
         }
 
         [HttpGet("details/{id:int}")]
-        public ActionResult<TourDto> Get(int id)
+        public async Task<ActionResult<TourDto>> GetAsync(int id)
         {
-            var result = _tourService.Get(id);
-            return CreateResponse(result);
+            try
+            {
+                var response = await _httpClient.GetAsync($"{microserviceUrl}/tours/{id}");
+
+                // Check the response
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    try
+                    {
+                        var receivedTour = JsonConvert.DeserializeObject<TourDto>(responseContent);
+                        return Ok(receivedTour);
+                    }
+                    catch (JsonSerializationException ex)
+                    {
+                        Console.WriteLine($"Error deserializing JSON response: {ex.Message}");
+                        // Log or handle the deserialization error
+                        return StatusCode(500); // Return an appropriate status code
+                    }
+                }
+                else
+                {
+                    Console.WriteLine($"HTTP request failed with status code {response.StatusCode}");
+                    return StatusCode((int)response.StatusCode);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                return StatusCode(500);
+            }
         }
 
         [HttpPut("publishedTours/{id:int}")]
         public ActionResult<TourDto> Publish(int id)
         {
-            var result = _tourService.Publish(id, User.PersonId());
-            return CreateResponse(result);
+            return StatusCode(500);
         }
 
         [HttpPut("archivedTours/{id:int}")]
         public ActionResult<TourDto> Archive(int id)
         {
-            var result = _tourService.Archive(id, User.PersonId());
-            return CreateResponse(result);
+            return StatusCode(500);
         }
 
         [HttpPut("tourTime/{id:int}")]
         public ActionResult<TourDto> AddTime(TourTimesDto tourTimesDto, int id)
         {
-            var result = _tourService.AddTime(tourTimesDto, id, User.PersonId());
-            return CreateResponse(result);
+            return StatusCode(500);
         }
 
     }
