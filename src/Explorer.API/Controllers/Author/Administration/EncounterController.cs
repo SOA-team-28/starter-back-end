@@ -100,8 +100,9 @@ namespace Explorer.API.Controllers.Author.Administration
      
 
         [HttpPut]
-        public ActionResult<EncounterDto> Update([FromForm] EncounterDto encounter, [FromForm] List<IFormFile>? imageF = null)
+        public async Task< ActionResult<EncounterDto>> Update([FromForm] EncounterDto encounter, [FromForm] List<IFormFile>? imageF = null)
         {
+            /*
 
             if (imageF != null && imageF.Any())
             {
@@ -112,6 +113,42 @@ namespace Explorer.API.Controllers.Author.Administration
 
             var result = _encounterService.Update(encounter,User.PersonId());
             return CreateResponse(result);
+            */
+
+            var microserviceUrl = "http://localhost:8082";
+
+            try
+            {
+                // Serijalizujte EncounterDto objekat u JSON format
+                var jsonContent = JsonConvert.SerializeObject(encounter);
+
+                // Kreirajte HTTP zahtjev sa JSON sadržajem
+                var httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+
+                // Pošaljite HTTP POST zahtjev ka Go mikroservisu
+                var response = await _httpClient.PutAsync($"{microserviceUrl}/encounters/update", httpContent);
+
+                // Provjerite odgovor
+                if (response.IsSuccessStatusCode)
+                {
+                    Console.WriteLine($"HTTP status successfull {response.StatusCode}");
+                    return encounter;
+                }
+                else
+                {
+                    // Ukoliko je odgovor neuspješan, obradite grešku na odgovarajući način
+                    Console.WriteLine($"HTTP request failed with status code {response.StatusCode}");
+                    return encounter;
+
+                }
+            }
+            catch (Exception ex)
+            {
+                // Uhvatite i obradite izuzetak ako se desi
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                return encounter;
+
+            }
         }
 
         [HttpDelete("{id:int}")]
@@ -161,6 +198,46 @@ namespace Explorer.API.Controllers.Author.Administration
 
 
         }
+        [HttpGet("getByCheckPoint/{chId:int}")]
+        public async Task<ActionResult<EncounterDto>> GetByCheckPoint([FromRoute]int chId)
+        {
+            /*
+            var result = _encounterService.Get(id);
+            return CreateResponse(result);
 
+            */
+            EncounterDto retrievedEncounter = new EncounterDto();
+            var microserviceUrl = "http://localhost:8082";
+            try
+            {
+                // Napravite HTTP GET zahtjev ka mikroservisu za dobavljanje encounter-a po ID-u
+                var response = await _httpClient.GetAsync($"{microserviceUrl}/encounters/getByCheckPoint/{chId}");
+
+                // Provjerite odgovor
+                if (response.IsSuccessStatusCode)
+                {
+                    // Ukoliko je odgovor uspješan, izvucite podatke iz odgovora
+                    var jsonString = await response.Content.ReadAsStringAsync();
+                     retrievedEncounter = JsonConvert.DeserializeObject<EncounterDto>(jsonString);
+
+                    Console.WriteLine($"Encounter retrieved successfully. ID: {retrievedEncounter.Id}");
+                    return retrievedEncounter;
+                }
+                else
+                {
+                    // Ukoliko je odgovor neuspješan, obradite grešku na odgovarajući način
+                    Console.WriteLine($"HTTP request failed with status code {response.StatusCode}");
+                    return retrievedEncounter; // Vratite null ili neku drugu indikaciju da je dobavljanje encounter-a neuspješno
+                }
+            }
+            catch (Exception ex)
+            {
+                // Uhvatite i obradite izuzetak ako se desi
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                return retrievedEncounter; // Vratite null ili neku drugu indikaciju o grešci
+            }
+
+
+        }
     }
 }
