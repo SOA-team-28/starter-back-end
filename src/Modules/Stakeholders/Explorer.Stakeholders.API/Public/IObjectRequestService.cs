@@ -11,6 +11,7 @@ namespace Explorer.Stakeholders.API.Public
     public interface IObjectRequestService
     {
         Result<ObjectRequestDto> Create(ObjectRequestDto request);
+        Result<ObjectRequestDto> Create(int mapObjectId, int authorId, string status);
         Result<ObjectRequestDto> Update(ObjectRequestDto request);
         Result<List<ObjectRequestDto>> GetAll();
         Result<ObjectRequestDto> AcceptRequest(int id, string notificationComment);

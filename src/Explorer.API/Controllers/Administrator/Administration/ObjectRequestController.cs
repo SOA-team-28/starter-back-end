@@ -2,12 +2,13 @@
 using Explorer.Stakeholders.API.Public;
 using Explorer.Stakeholders.Core.UseCases;
 using Explorer.Tours.API.Dtos;
+using Explorer.Tours.Core.Domain;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Explorer.API.Controllers.Administrator.Administration
 {
-    [Authorize(Policy = "administratorAndAuthorPolicy")]
+    //[Authorize(Policy = "administratorAndAuthorPolicy")]
     [Route("api/administration/objectRequests")]
     public class ObjectRequestController : BaseApiController
     {
@@ -23,6 +24,13 @@ namespace Explorer.API.Controllers.Administrator.Administration
         public ActionResult<ObjectRequestDto> Create([FromBody] ObjectRequestDto request)
         {
             var result = _objectRequestService.Create(request);
+            return CreateResponse(result);
+        }
+
+        [HttpPost("create/{mapObjectId:int}/{authorId:int}/{status}")]
+        public ActionResult<ObjectRequestDto> CreateObjectRequest(int mapObjectId, int authorId, string status)
+        {
+            var result = _objectRequestService.Create(mapObjectId, authorId, status);
             return CreateResponse(result);
         }
 

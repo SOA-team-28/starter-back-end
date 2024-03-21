@@ -22,7 +22,7 @@ public class MapObjectQueryTests : BaseToursIntegrationTest
         var controller = CreateMapObjectController(scope);
 
         // Act
-        var result = ((ObjectResult)controller.GetAll(0, 0).Result)?.Value as PagedResult<MapObjectDto>;
+        var result = ((ObjectResult)controller.GetAllAsync(0, 0).Result)?.Value as PagedResult<MapObjectDto>;
 
         // Assert
         result.ShouldNotBeNull();

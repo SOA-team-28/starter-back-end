@@ -34,7 +34,7 @@ namespace Explorer.Tours.Tests.Integration.Tourism
             };
 
             // Act
-            var result = ((ObjectResult)controller.Create(newEntity).Result)?.Value as TourPreferenceDto;
+            var result = ((ObjectResult)controller.CreateAsync(newEntity).Result)?.Value as TourPreferenceDto;
 
             // Assert - Response
             result.ShouldNotBeNull();
@@ -61,7 +61,7 @@ namespace Explorer.Tours.Tests.Integration.Tourism
 
 
             // Act
-            var result = (ObjectResult)controller.Create(updatedEntity).Result;
+            var result = (ObjectResult)controller.CreateAsync(updatedEntity).Result;
 
             // Assert
             result.ShouldNotBeNull();
@@ -88,7 +88,7 @@ namespace Explorer.Tours.Tests.Integration.Tourism
             };
 
             // Act
-            var result = ((ObjectResult)controller.Update(updatedEntity).Result)?.Value as TourPreferenceDto;
+            var result = ((ObjectResult)controller.UpdateAsync(updatedEntity).Result)?.Value as TourPreferenceDto;
 
             // Assert - Response
             result.ShouldNotBeNull();
@@ -126,7 +126,7 @@ namespace Explorer.Tours.Tests.Integration.Tourism
             };
 
             // Act
-            var result = (ObjectResult)controller.Update(updatedEntity).Result;
+            var result = (ObjectResult)controller.UpdateAsync(updatedEntity).Result;
 
             // Assert
             result.ShouldNotBeNull();
@@ -142,7 +142,7 @@ namespace Explorer.Tours.Tests.Integration.Tourism
             var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
 
             // Act
-            var result = (OkResult)controller.Delete(-3);
+            var result = (OkResult)controller.DeleteAsync(-3);
 
             // Assert - Response
             result.ShouldNotBeNull();
@@ -161,7 +161,7 @@ namespace Explorer.Tours.Tests.Integration.Tourism
             var controller = CreateController(scope);
 
             // Act
-            var result = (ObjectResult)controller.Delete(-1000);
+            var result = (ObjectResult)controller.DeleteAsync(-1000);
 
             // Assert
             result.ShouldNotBeNull();
