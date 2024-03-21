@@ -99,8 +99,8 @@ namespace Explorer.API.Controllers.Author.Administration
     
      
 
-        [HttpPut]
-        public async Task< ActionResult<EncounterDto>> Update([FromForm] EncounterDto encounter, [FromForm] List<IFormFile>? imageF = null)
+        [HttpPut("{chId:int}")]
+        public async Task< ActionResult<EncounterDto>> Update([FromForm] EncounterDto encounter, [FromRoute] int chId,[FromForm] List<IFormFile>? imageF = null)
         {
             /*
 
@@ -114,7 +114,7 @@ namespace Explorer.API.Controllers.Author.Administration
             var result = _encounterService.Update(encounter,User.PersonId());
             return CreateResponse(result);
             */
-
+            encounter.CheckPointId = chId;
             var microserviceUrl = "http://localhost:8082";
 
             try
