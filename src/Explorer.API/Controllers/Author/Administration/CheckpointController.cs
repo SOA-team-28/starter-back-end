@@ -7,6 +7,9 @@ using Explorer.Tours.API.Public.Administration;
 using Explorer.Tours.Core.Domain.Tours;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using System.Net.Http;
+using System.Text;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace Explorer.API.Controllers.Author.Administration
@@ -16,6 +19,8 @@ namespace Explorer.API.Controllers.Author.Administration
     {
         private readonly ICheckpointService _checkpointService;
         private readonly ImageService _imageService;
+        private string microserviceUrl = "http://localhost:8081";
+        private HttpClient _httpClient = new HttpClient();
 
         public CheckpointController(ICheckpointService checkpointService)
         {
@@ -27,8 +32,7 @@ namespace Explorer.API.Controllers.Author.Administration
         [Authorize(Policy = "authorPolicy")]
         public ActionResult<List<CheckpointDto>> GetAllByTour([FromQuery] int page, [FromQuery] int pageSize, int id)
         {
-            var result = _checkpointService.GetPagedByTour(page, pageSize, id);
-            return CreateResponse(result);
+            return StatusCode(500);
         }
 
         [HttpGet("details/{id:int}")]
@@ -44,15 +48,7 @@ namespace Explorer.API.Controllers.Author.Administration
         [Authorize(Policy = "authorPolicy")]
         public ActionResult<CheckpointDto> Update([FromForm] CheckpointDto checkpoint, int id, [FromForm] List<IFormFile>? pictures = null)
         {
-            if (pictures != null && pictures.Any())
-            {
-                var imageNames = _imageService.UploadImages(pictures);
-                checkpoint.Pictures = imageNames;
-            }
-
-            checkpoint.Id = id;
-            var result = _checkpointService.Update(checkpoint, User.PersonId());
-            return CreateResponse(result);
+            return StatusCode(500);
         }
 
         [HttpDelete("{id:int}")]
@@ -67,33 +63,19 @@ namespace Explorer.API.Controllers.Author.Administration
         [Authorize(Policy = "authorPolicy")]
         public ActionResult<CheckpointDto> CreateCheckpointSecret([FromForm] CheckpointSecretDto secretDto, int id, [FromForm] List<IFormFile>? pictures = null)
         {
-            if (pictures != null && pictures.Any())
-            {
-                var imageNames = _imageService.UploadImages(pictures);
-                secretDto.Pictures = imageNames;
-            }
-
-            var result = _checkpointService.CreateChechpointSecreat(secretDto,id, User.PersonId());
-            return CreateResponse(result);
+            return StatusCode(500);
         }
 
         [HttpPut("updateSecret/{id:int}")]
         [Authorize(Policy = "authorPolicy")]
         public ActionResult<CheckpointDto> UpdateCheckpointSecret([FromForm] CheckpointSecretDto secretDto, int id, [FromForm] List<IFormFile>? pictures = null)
         {
-            if (pictures != null && pictures.Any())
-            {
-                var imageNames = _imageService.UploadImages(pictures);
-                secretDto.Pictures = imageNames;
-            }
-
-            var result = _checkpointService.UpdateChechpointSecreat(secretDto, id, User.PersonId());
-            return CreateResponse(result);
+            return StatusCode(500);
         }
 
         [HttpPost("create/{status}")]
         [Authorize(Policy = "authorPolicy")]
-        public ActionResult<CheckpointDto> Create([FromForm] CheckpointDto checkpoint, [FromRoute] string status, [FromForm] List<IFormFile>? pictures = null)
+        public async Task<ActionResult<CheckpointDto>> CreateAsync([FromForm] CheckpointDto checkpoint, [FromRoute] string status, [FromForm] List<IFormFile>? pictures = null)
         {
             if (pictures != null && pictures.Any())
             {
@@ -101,15 +83,45 @@ namespace Explorer.API.Controllers.Author.Administration
                 checkpoint.Pictures = imageNames;
             }
 
-            var result = _checkpointService.Create(checkpoint, User.PersonId(), status);
-            return CreateResponse(result);
+            try
+            {
+                var jsonContent = JsonConvert.SerializeObject(checkpoint);
+                var httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+                var response = await _httpClient.PostAsync($"{microserviceUrl}/checkpoints", httpContent);
+
+                // Check the response
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    try
+                    {
+                        var receivedTour = JsonConvert.DeserializeObject<CheckpointDto>(responseContent);
+                        return Ok(receivedTour);
+                    }
+                    catch (JsonSerializationException ex)
+                    {
+                        Console.WriteLine($"Error deserializing JSON response: {ex.Message}");
+                        // Log or handle the deserialization error
+                        return StatusCode(500); // Return an appropriate status code
+                    }
+                }
+                else
+                {
+                    Console.WriteLine($"HTTP request failed with status code {response.StatusCode}");
+                    return StatusCode((int)response.StatusCode);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                return StatusCode(500);
+            }
         }
 
         [HttpGet]
         public ActionResult<PagedResult<CheckpointDto>> GetAll([FromQuery] int page, [FromQuery] int pageSize)
         {
-            var result = _checkpointService.GetPaged(page, pageSize);
-            return CreateResponse(result);
+            return StatusCode(500);
         }
     }
 }

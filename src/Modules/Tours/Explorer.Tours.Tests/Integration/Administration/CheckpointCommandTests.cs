@@ -40,7 +40,7 @@ namespace Explorer.Tours.Tests.Integration.Administration
             };
 
             // Act
-            var result = ((ObjectResult)controller.Create(newEntity, "Private").Result)?.Value as CheckpointDto;
+            var result = ((ObjectResult)controller.CreateAsync(newEntity, "Private").Result)?.Value as CheckpointDto;
 
             // Assert - Response
             result.ShouldNotBeNull();
