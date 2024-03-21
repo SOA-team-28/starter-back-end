@@ -150,10 +150,35 @@ namespace Explorer.API.Controllers.Tourist.Encounters
         }
 
         [HttpDelete("{id:int}")]
-        public ActionResult Delete(int id)
+        public async Task<ActionResult> Delete(int id)
         {
-            var result = _encounterExecutionService.Delete(id, User.PersonId());
-            return CreateResponse(result);
+            var microserviceUrl = "http://localhost:8082";
+            var requestUrl = $"{microserviceUrl}/executions/delete/{id}";
+
+            try
+            {
+                // Pošaljite HTTP DELETE zahtjev ka mikroservisu
+                var response = await _httpClient.DeleteAsync(requestUrl);
+
+                // Provjerite odgovor
+                if (response.IsSuccessStatusCode)
+                {
+                    Console.WriteLine($"HTTP status successful: {response.StatusCode}");
+                    return Ok(); // Vratite status kod 200 OK ako je brisanje uspješno
+                }
+                else
+                {
+                    // Ukoliko je odgovor neuspješan, obradite grešku na odgovarajući način
+                    Console.WriteLine($"HTTP request failed with status code: {response.StatusCode}");
+                    return StatusCode((int)response.StatusCode); // Vratite odgovarajući status kod u zavisnosti od odgovora mikroservisa
+                }
+            }
+            catch (Exception ex)
+            {
+                // Uhvatite i obradite izuzetak ako se desi
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                return StatusCode(500); // Vratite status kod 500 Internal Server Error ako se desi izuzetak
+            }
         }
 
         [HttpGet("get-all/{id:int}")]
@@ -168,14 +193,14 @@ namespace Explorer.API.Controllers.Tourist.Encounters
         }
 
         [HttpGet("get-all-completed")]
-        public async Task<ActionResult<List<EncounterExecutionDto>>> GetAllCompletedByTourist([FromQuery] int page, [FromQuery] int pageSize)
+        public async Task<ActionResult<List<EncounterExecutionDto>>> GetAllCompletedByTourist([FromQuery] int page, [FromQuery] int pageSize, [FromQuery] int touristId)
         {
             var microserviceUrl = "http://localhost:8082"; // Adresa vašeg mikroservisa
 
             try
             {
                 // Napravite HTTP GET zahtjev ka mikroservisu
-                var response = await _httpClient.GetAsync($"{microserviceUrl}/executions/get-all-completed/2");
+                var response = await _httpClient.GetAsync($"{microserviceUrl}/executions/get-all-completed/{touristId}");
 
                 // Provjerite odgovor
                 if (response.IsSuccessStatusCode)

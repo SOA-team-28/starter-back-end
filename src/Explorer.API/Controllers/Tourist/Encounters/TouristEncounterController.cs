@@ -3,15 +3,15 @@ using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.Encounters.API.Dtos;
 using Explorer.Encounters.API.Public;
 using Explorer.Encounters.Core.UseCases;
+using Explorer.Stakeholders.Core.Domain;
 using Explorer.Stakeholders.Infrastructure.Authentication;
 using Explorer.Tours.API.Dtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 using System.Globalization;
 using System.Net.Http;
+using System.Text;
 using Newtonsoft.Json;
-using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 using Azure;
@@ -25,7 +25,8 @@ namespace Explorer.API.Controllers.Tourist.Encounters
     {
         private readonly IEncounterService _encounterService;
         private readonly ImageService _imageService;
-        private readonly HttpClient    _httpClient ;
+        private readonly HttpClient _httpClient;
+
 
         public TouristEncounterController(IEncounterService encounterService)
         {
@@ -37,15 +38,15 @@ namespace Explorer.API.Controllers.Tourist.Encounters
 
         [HttpPost]
         [Authorize(Policy = "touristPolicy")]
-        public ActionResult<EncounterDto> Create([FromForm] EncounterDto encounter, [FromQuery] long checkpointId, [FromQuery] bool isSecretPrerequisite, [FromForm] List<IFormFile>? imageF = null)
+        public async Task<ActionResult<EncounterDto>> Create([FromForm] EncounterDto encounter, [FromQuery] long checkpointId, [FromQuery] bool isSecretPrerequisite, [FromForm] List<IFormFile>? imageF = null)
         {
 
 
-            if (imageF != null && imageF.Any())
+           /* if (imageF != null && imageF.Any())
             {
                 var imageNames = _imageService.UploadImages(imageF);
-                if (encounter.Type == "Location") ;
-                    //encounter.Image = imageNames[0];
+                if (encounter.Type == "Location")
+                    encounter.Image = imageNames[0];
             }
 
             // Transformacija koordinata za longitude
@@ -57,6 +58,59 @@ namespace Explorer.API.Controllers.Tourist.Encounters
             encounter.Status = "Draft";
             var result = _encounterService.CreateForTourist(encounter, checkpointId, isSecretPrerequisite, User.PersonId());
             return CreateResponse(result);
+           */
+
+
+
+            try
+            {
+                if (imageF != null && imageF.Any())
+                {
+                    var imageNames = _imageService.UploadImages(imageF);
+                    if (encounter.Type == "Location")
+                        encounter.Image = imageNames[0];
+                }
+
+                // Transformacija koordinata za longitude
+                encounter.Longitude = TransformisiKoordinatu(encounter.Longitude);
+
+                // Transformacija koordinata za latitude
+                encounter.Latitude = TransformisiKoordinatu(encounter.Latitude);
+
+                encounter.Status = "Draft";
+
+                var microserviceUrl = "http://localhost:8082"; // Promijenite URL prema adresi vašeg mikroservisa
+
+                // Serijalizujte EncounterDto objekat u JSON format
+                var jsonContent = JsonConvert.SerializeObject(encounter);
+
+                // Kreirajte HTTP zahtjev sa JSON sadržajem
+                var httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+
+                // Pošaljite HTTP POST zahtjev ka mikroservisu
+                var response = await _httpClient.PostAsync($"{microserviceUrl}/encounters/createByTourist/{checkpointId}/{User.PersonId()}", httpContent);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    // Ako je odgovor uspješan, čitajte odgovor mikroservisa i vratite ga kao rezultat
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    var createdEncounter = JsonConvert.DeserializeObject<EncounterDto>(responseContent);
+                    return Ok(createdEncounter);
+                }
+                else
+                {
+                    // Ukoliko je odgovor neuspješan, obradite grešku na odgovarajući način
+                    var errorMessage = await response.Content.ReadAsStringAsync();
+                    return StatusCode((int)response.StatusCode, errorMessage);
+                }
+            }
+            catch (Exception ex)
+            {
+                // Uhvatite i obradite izuzetak ako se desi
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                return StatusCode(500, "An error occurred while processing your request.");
+            }
+
         }
 
         [HttpPut]

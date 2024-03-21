@@ -17,11 +17,13 @@ using System.Net.Http.Json;
 using System.Threading.Tasks;
 using Azure;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using Explorer.Tours.Core.Domain.Tours;
+using System.Diagnostics.Metrics;
 
 namespace Explorer.API.Controllers.Author.Administration
 {
     [Route("api/administration/encounter")]
-    [Authorize(Policy = "authorPolicy")]
+    
 
 
     public class EncounterController : BaseApiController
@@ -41,6 +43,7 @@ namespace Explorer.API.Controllers.Author.Administration
         
 
         [HttpPost]
+        [Authorize(Policy = "authorPolicy")]
         public async Task<ActionResult<Boolean>> Create([FromForm] EncounterDto encounter, [FromQuery] int checkpointId, [FromQuery] bool isSecretPrerequisite, [FromForm] List<IFormFile>? imageF = null)
         {
             /*
@@ -99,6 +102,7 @@ namespace Explorer.API.Controllers.Author.Administration
     
      
 
+
         [HttpPut("{chId:int}")]
         public async Task< ActionResult<EncounterDto>> Update([FromForm] EncounterDto encounter, [FromRoute] int chId,[FromForm] List<IFormFile>? imageF = null)
         {
@@ -150,15 +154,44 @@ namespace Explorer.API.Controllers.Author.Administration
 
             }
         }
+        
 
         [HttpDelete("{id:int}")]
-        public ActionResult Delete(int id)
+        [Authorize(Policy = "touristPolicy")]
+        public async Task<ActionResult> Delete(int id)
         {
-            var result = _encounterService.Delete(id, User.PersonId());
-            return CreateResponse(result);
+            var microserviceUrl = "http://localhost:8082";
+            var requestUrl = $"{microserviceUrl}/encounters/delete/{id}";
+
+            try
+            {
+                // Pošaljite HTTP DELETE zahtjev ka mikroservisu
+                var response = await _httpClient.DeleteAsync(requestUrl);
+
+                // Provjerite odgovor
+                if (response.IsSuccessStatusCode)
+                {
+                    Console.WriteLine($"HTTP status successful: {response.StatusCode}");
+                    return Ok(); // Vratite status kod 200 OK ako je brisanje uspješno
+                }
+                else
+                {
+                    // Ukoliko je odgovor neuspješan, obradite grešku na odgovarajući način
+                    Console.WriteLine($"HTTP request failed with status code: {response.StatusCode}");
+                    return StatusCode((int)response.StatusCode); // Vratite odgovarajući status kod u zavisnosti od odgovora mikroservisa
+                }
+            }
+            catch (Exception ex)
+            {
+                // Uhvatite i obradite izuzetak ako se desi
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                return StatusCode(500); // Vratite status kod 500 Internal Server Error ako se desi izuzetak
+            }
         }
 
+
         [HttpGet("{id:int}")]
+        [Authorize(Policy = "authorPolicy")]
         public async Task<ActionResult<EncounterDto>> GetById(int id)
         {
             /*
