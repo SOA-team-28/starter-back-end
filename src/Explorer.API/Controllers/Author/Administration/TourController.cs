@@ -132,7 +132,29 @@ namespace Explorer.API.Controllers.Author.Administration
         {
             try
             {
-                var response = await _httpClient.GetAsync($"{microserviceUrl}/tours/by-author?page={page}&pageSize={pageSize}");
+
+                // Get the JWT token from the authorization header
+                var authorizationHeader = HttpContext.Request.Headers["Authorization"].FirstOrDefault();
+                if (string.IsNullOrEmpty(authorizationHeader) || !authorizationHeader.StartsWith("Bearer "))
+                {
+                    // JWT token not found in the authorization header
+                    return Unauthorized(); // Return 401 Unauthorized
+                }
+
+                var jwtToken = authorizationHeader.Substring("Bearer ".Length);
+
+                // Parse the JWT token
+                var jwtPayload = ParseJwtPayload(jwtToken);
+                if (jwtPayload == null || !jwtPayload.ContainsKey("id"))
+                {
+                    // ID not found in the JWT payload
+                    return Unauthorized(); // Return 401 Unauthorized
+                }
+
+                var userId = jwtPayload["id"].ToString();
+
+                var url = $"{microserviceUrl}/tours/byauthor/{userId}";
+                var response = await _httpClient.GetAsync(url);
 
                 // Check the response
                 if (response.IsSuccessStatusCode)
@@ -163,22 +185,67 @@ namespace Explorer.API.Controllers.Author.Administration
             }
         }
 
+
         [HttpGet]
         public ActionResult<PagedResult<TourDto>> GetAll([FromQuery] int page, [FromQuery] int pageSize)
         {
             return StatusCode(500);
         }
 
-        [HttpPut("add/{tourId:int}/{equipmentId:int}")]
-        public ActionResult<TourDto> AddEquipment(int tourId, int equipmentId)
+        [HttpPut("add/{tourId}/{equipmentId}")]
+        public async Task<ActionResult<TourDto>> AddEquipment(int tourId, int equipmentId)
         {
-            return StatusCode(500);
+            try
+            {
+                var requestBody = JsonConvert.SerializeObject(new { TourId = tourId, EquipmentId = equipmentId });
+                var httpContent = new StringContent(requestBody, Encoding.UTF8, "application/json");
+                var response = await _httpClient.PutAsync($"{microserviceUrl}/tours/add/{tourId}/{equipmentId}", httpContent);
+
+                // Check the response
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    var addedEquipment = JsonConvert.DeserializeObject<TourDto>(responseContent);
+                    return Ok(addedEquipment);
+                }
+                else
+                {
+                    return StatusCode((int)response.StatusCode);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                return StatusCode(500);
+            }
         }
 
-        [HttpPut("remove/{tourId:int}/{equipmentId:int}")]
-        public ActionResult<TourDto> RemoveEquipment(int tourId, int equipmentId)
+        [HttpPut("remove/{tourId}/{equipmentId}")]
+        public async Task<ActionResult<TourDto>> RemoveEquipment(int tourId, int equipmentId)
         {
-            return StatusCode(500);
+            try
+            {
+                var requestBody = JsonConvert.SerializeObject(new { TourId = tourId, EquipmentId = equipmentId });
+                var httpContent = new StringContent(requestBody, Encoding.UTF8, "application/json");
+                var response = await _httpClient.PutAsync($"{microserviceUrl}/tours/remove/{tourId}/{equipmentId}", httpContent);
+
+                // Check the response
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    var removedEquipment = JsonConvert.DeserializeObject<TourDto>(responseContent);
+                    return Ok(removedEquipment);
+                }
+                else
+                {
+                    return StatusCode((int)response.StatusCode);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                return StatusCode(500);
+            }
         }
 
         [HttpGet("details/{id:int}")]
@@ -235,5 +302,33 @@ namespace Explorer.API.Controllers.Author.Administration
             return StatusCode(500);
         }
 
+        private Dictionary<string, object> ParseJwtPayload(string jwtToken)
+        {
+            try
+            {
+                // Split the JWT token into header, payload, and signature
+                var tokenParts = jwtToken.Split('.');
+                if (tokenParts.Length != 3)
+                {
+                    return null; // Invalid JWT token format
+                }
+
+                // Decode the payload part
+                var payloadBytes = Convert.FromBase64String(tokenParts[1]);
+                var payloadJson = Encoding.UTF8.GetString(payloadBytes);
+
+                // Deserialize the payload JSON into a dictionary
+                var payload = JsonConvert.DeserializeObject<Dictionary<string, object>>(payloadJson);
+                return payload;
+            }
+            catch (Exception)
+            {
+                return null; // Error parsing JWT token
+            }
+        }
+
     }
+
+
+
 }
