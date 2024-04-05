@@ -1,0 +1,101 @@
+version: '3.9'
+
+services:
+  explorer:
+    build:
+      dockerfile: Dockerfile
+      context: .
+      target: final
+    restart: on-failure
+    networks:
+      - application
+      - database
+    ports:
+      - "8080:8080"
+    environment:
+      DATABASE_HOST: database
+      DATABASE_PORT: 5432
+      DATABASE_PASSWORD: super
+      DATABASE_USER: postgres
+      DATABASE_SCHEMA: explorer-v1
+    depends_on:
+      - database
+
+   database:
+    image: postgres:13
+    restart: always
+    networks:
+      - database
+    environment:
+      POSTGRES_PASSWORD: super
+      POSTGRES_USER: postgres
+      POSTGRES_DB: explorer-v1
+    volumes:
+      - type: volume
+        source: database-data
+        target: /var/lib/postgresql/data
+      - type: bind
+        source: explorer-init-data.sql
+        target: /tmp/explorer-init.sql
+    ports:
+      - "5432:5432"
+  
+  tours_server:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    image: tours_server
+    container_name: tours_container
+    restart: always
+    networks:
+      - servers
+    ports:
+      - 8081:8081
+    depends_on:
+      - tours_database
+
+  tours_database:
+    image: postgres
+    container_name: postgres
+    restart: always
+    networks:
+      - servers
+    ports:
+      - 4000:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: super
+      POSTGRES_DB: tours
+    volumes:
+      - database-data:/var/lib/postgresql/data
+  
+  encounters_server:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    image: tours_server
+    container_name: encounters_container
+    restart: always
+    networks:
+      - servers
+    ports:
+      - 8082:8082
+    depends_on:
+      - encounters_database
+
+  encounters_database:
+    image: postgres
+    container_name: postgres
+    restart: always
+    networks:
+      - servers
+    ports:
+      - 4000:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: super
+      POSTGRES_DB: encounters
+    volumes:
+      - database-data:/var/lib/postgresql/data
+
+  
