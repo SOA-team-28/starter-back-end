@@ -1,6 +1,7 @@
 version: '3.9'
 
 services:
+  
   explorer:
     build:
       dockerfile: Dockerfile
@@ -35,14 +36,14 @@ services:
         source: database-data
         target: /var/lib/postgresql/data
       - type: bind
-        source: explorer-init-data.sql
-        target: /tmp/explorer-init.sql
+        source: explorer-v1-init-data.sql
+        target: /tmp/explorer-v1-init.sql
     ports:
       - "5432:5432"
   
   tours_server:
     build:
-      context: ./
+      context: ../../tours/WebServerWithDB
       dockerfile: Dockerfile
     image: tours_server
     container_name: tours_container
@@ -54,7 +55,7 @@ services:
     depends_on:
       - tours_database
 
-  tours_database:
+   tours_database:
     image: postgres
     container_name: postgres
     restart: always
@@ -71,9 +72,9 @@ services:
   
   encounters_server:
     build:
-      context: ./
+      context: ../../encounters/encounters/WebServerWithDB
       dockerfile: Dockerfile
-    image: tours_server
+    image: encounters_server
     container_name: encounters_container
     restart: always
     networks:
@@ -83,7 +84,7 @@ services:
     depends_on:
       - encounters_database
 
-  encounters_database:
+   encounters_database:
     image: postgres
     container_name: postgres
     restart: always
