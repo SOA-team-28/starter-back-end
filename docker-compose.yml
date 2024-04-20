@@ -1,7 +1,6 @@
 version: '3.9'
 
 services:
-  
   explorer:
     build:
       dockerfile: Dockerfile
@@ -9,10 +8,9 @@ services:
       target: final
     restart: on-failure
     networks:
-      - application
       - database
     ports:
-      - "8080:8080"
+      - "8080:80"
     environment:
       DATABASE_HOST: database
       DATABASE_PORT: 5432
@@ -22,7 +20,7 @@ services:
     depends_on:
       - database
 
-   database:
+  database:
     image: postgres:13
     restart: always
     networks:
@@ -40,7 +38,7 @@ services:
         target: /tmp/explorer-v1-init.sql
     ports:
       - "5432:5432"
-  
+
   tours_server:
     build:
       context: ../../tours/WebServerWithDB
@@ -91,7 +89,7 @@ services:
     networks:
       - servers
     ports:
-      - 4000:5432
+      - 4001:5432
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: super
@@ -99,4 +97,17 @@ services:
     volumes:
       - database-data:/var/lib/postgresql/data
 
-  
+volumes:
+  database-data:
+    name: explorer
+
+  tours_database_data:
+    name: tours_database_volume
+
+  encounters_database_data:
+    name: encounters_database_volume
+
+networks:
+  database:
+    name: database
+    driver: bridge
