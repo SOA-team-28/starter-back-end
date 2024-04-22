@@ -1,30 +1,12 @@
 version: '3.9'
 
 services:
-  explorer:
-    build:
-      dockerfile: Dockerfile
-      context: .
-      target: final
-    restart: on-failure
-    networks:
-      - database
-    ports:
-      - "8080:80"
-    environment:
-      DATABASE_HOST: database
-      DATABASE_PORT: 5432
-      DATABASE_PASSWORD: super
-      DATABASE_USER: postgres
-      DATABASE_SCHEMA: explorer-v1
-    depends_on:
-      - database
-
   database:
     image: postgres:13
+    container_name: postgres_mono
     restart: always
     networks:
-      - database
+      - servers
     environment:
       POSTGRES_PASSWORD: super
       POSTGRES_USER: postgres
@@ -37,7 +19,56 @@ services:
         source: explorer-v1-init-data.sql
         target: /tmp/explorer-v1-init.sql
     ports:
-      - "5432:5432"
+      - "4002:5432"
+
+  encounters_database:
+    image: postgres
+    container_name: postgres_encounters
+    restart: always
+    networks:
+      - servers
+    ports:
+      - 4001:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: super
+      POSTGRES_DB: encounters
+    volumes:
+      - encounters_database_data:/var/lib/postgresql/data
+
+  tours_database:
+    image: postgres
+    container_name: postgres_tours
+    restart: always
+    networks:
+      - servers
+    ports:
+      - 4000:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: super
+      POSTGRES_DB: tours
+    volumes:
+      - tours_database_data:/var/lib/postgresql/data
+
+  explorer:
+    build:
+      dockerfile: Dockerfile
+      context: .
+      target: final
+    restart: on-failure
+    networks:
+      - servers
+    ports:
+      - "44333:44333"
+    environment:
+      DATABASE_HOST: database
+      DATABASE_PORT: 5432
+      DATABASE_PASSWORD: super
+      DATABASE_USER: postgres
+      DATABASE_SCHEMA: explorer-v1
+    depends_on:
+      - database
 
   tours_server:
     build:
@@ -53,24 +84,11 @@ services:
     depends_on:
       - tours_database
 
-   tours_database:
-    image: postgres
-    container_name: postgres
-    restart: always
-    networks:
-      - servers
-    ports:
-      - 4000:5432
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: super
-      POSTGRES_DB: tours
-    volumes:
-      - database-data:/var/lib/postgresql/data
+  
   
   encounters_server:
     build:
-      context: ../../encounters/encounters/WebServerWithDB
+      context: ../../encounters/WebServerWithDB
       dockerfile: Dockerfile
     image: encounters_server
     container_name: encounters_container
@@ -82,20 +100,6 @@ services:
     depends_on:
       - encounters_database
 
-   encounters_database:
-    image: postgres
-    container_name: postgres
-    restart: always
-    networks:
-      - servers
-    ports:
-      - 4001:5432
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: super
-      POSTGRES_DB: encounters
-    volumes:
-      - database-data:/var/lib/postgresql/data
 
 volumes:
   database-data:
@@ -108,6 +112,6 @@ volumes:
     name: encounters_database_volume
 
 networks:
-  database:
-    name: database
+  servers:
+    name: servers
     driver: bridge
