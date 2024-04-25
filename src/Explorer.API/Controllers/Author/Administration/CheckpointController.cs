@@ -19,7 +19,7 @@ namespace Explorer.API.Controllers.Author.Administration
     {
         private readonly ICheckpointService _checkpointService;
         private readonly ImageService _imageService;
-        private string microserviceUrl = "http://localhost:8081";
+        private string microserviceUrl = "http://tours_server:8081";
         private HttpClient _httpClient = new HttpClient();
 
         public CheckpointController(ICheckpointService checkpointService)

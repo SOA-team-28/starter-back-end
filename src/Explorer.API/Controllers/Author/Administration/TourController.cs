@@ -17,7 +17,7 @@ namespace Explorer.API.Controllers.Author.Administration
     public class TourController : BaseApiController
     {
         private readonly ITourService _tourService;
-        private string microserviceUrl = "http://localhost:8081";
+        private string microserviceUrl = "http://tours_server:8081";
         private HttpClient _httpClient = new HttpClient();
 
 
