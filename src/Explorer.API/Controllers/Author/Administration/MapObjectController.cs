@@ -36,7 +36,7 @@ namespace Explorer.API.Controllers.Author.Administration
         [HttpGet]
         public async Task<ActionResult<List<MapObjectDto>>> GetAllAsync()
         {
-            var microserviceUrl = "http://localhost:8081";
+            var microserviceUrl = "http://tours_server:8081";
 
             try
             {
@@ -109,7 +109,7 @@ namespace Explorer.API.Controllers.Author.Administration
             //var result = _mapObjectService.Create(mapObject, userId, status);
             //return CreateResponse(result);
 
-            var microserviceUrl = "http://localhost:8081";
+            var microserviceUrl = "http://tours_server:8081";
             /*
             try
             {

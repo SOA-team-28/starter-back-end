@@ -32,7 +32,7 @@ namespace Explorer.API.Controllers.Tourist.Tourism
             //var result = _tourPreferenceService.Create(preference);
             //return CreateResponse(result);
 
-            var microserviceUrl = "http://localhost:8081";
+            var microserviceUrl = "http://tours_server:8081";
 
             try
             {
@@ -63,7 +63,7 @@ namespace Explorer.API.Controllers.Tourist.Tourism
         {
             //var result = _tourPreferenceService.Update(preference);
             //return CreateResponse(result);
-            var microserviceUrl = "http://localhost:8081";
+            var microserviceUrl = "http://tours_server:8081";
 
             try
             {
@@ -94,7 +94,7 @@ namespace Explorer.API.Controllers.Tourist.Tourism
         {
             //var result = _tourPreferenceService.Delete(id);
             //return CreateResponse(result);
-            var microserviceUrl = "http://localhost:8081";
+            var microserviceUrl = "http://tours_server:8081";
 
             try
             {
@@ -113,7 +113,7 @@ namespace Explorer.API.Controllers.Tourist.Tourism
         {
             //var result = _tourPreferenceService.GetPreferenceByCreator(page, pageSize, id);
             //return CreateResponse(result);
-            var microserviceUrl = "http://localhost:8081";
+            var microserviceUrl = "http://tours_server:8081";
 
             try
             {

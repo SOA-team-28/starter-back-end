@@ -11,7 +11,7 @@ namespace Explorer.API.Controllers.Author.Administration
     [Route("api/manipulation/equipment")]
     public class EquipmentController : BaseApiController
     {
-        private string microserviceUrl = "http://localhost:8081";
+        private string microserviceUrl = "http://tours_server:8081";
         private HttpClient _httpClient = new HttpClient();
 
         public EquipmentController(IEquipmentService equipmentService)
