@@ -53,7 +53,7 @@ namespace Explorer.Stakeholders.Core.UseCases
             var bodyBuilder = new BodyBuilder();
             bodyBuilder.HtmlBody = $"<p>Dear {account.Name},</p>" +
                                    $"<p>Thank you for registering. Please click the following link to verify your email:</p>" +
-                                   $"<a href='https://localhost:44333/api/users/verify/{tokenData}'>Verify Email</a>";
+                                   $"<a href='http://localhost:8080/api/users/verify/{tokenData}'>Verify Email</a>";
 
             message.Body = bodyBuilder.ToMessageBody();
 

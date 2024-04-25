@@ -11,7 +11,7 @@ public static class CorsConfiguration
             options.AddPolicy(name: corsPolicy,
                 builder =>
                 {
-                    builder.WithOrigins(ParseCorsOrigins())
+                    builder.AllowAnyOrigin()
                         .WithHeaders(HeaderNames.ContentType, HeaderNames.Authorization, "access_token")
                         .WithMethods("GET", "PUT", "POST", "PATCH", "DELETE", "OPTIONS");
                 });
