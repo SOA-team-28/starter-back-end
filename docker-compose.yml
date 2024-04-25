@@ -72,7 +72,7 @@ services:
 
   tours_server:
     build:
-      context: ../../tours/WebServerWithDB
+      context: ../tours/WebServerWithDB
       dockerfile: Dockerfile
     image: tours_server
     container_name: tours_container
@@ -88,7 +88,7 @@ services:
   
   encounters_server:
     build:
-      context: ../../encounters/WebServerWithDB
+      context: ../encounters/WebServerWithDB
       dockerfile: Dockerfile
     image: encounters_server
     container_name: encounters_container

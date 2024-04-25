@@ -58,7 +58,7 @@ namespace Explorer.API.Controllers.Tourist.Encounters
             */
             //DOBAVI ENCOUNTER PREKO CHID
             EncounterDto retrievedEncounter = new EncounterDto();
-            var microserviceUrl = "http://localhost:8082";
+            var microserviceUrl = "http://encounters_server:8082";
 
             try
             {
@@ -101,7 +101,7 @@ namespace Explorer.API.Controllers.Tourist.Encounters
           encExecutionDto.Status = "Active";
             encExecutionDto.EncounterId = retrievedEncounter.Id;
            // encExecutionDto.EncounterDto.CheckPointId = chId;
-           // var microserviceUrl = "http://localhost:8082";
+           // var microserviceUrl = "http://encounters_server:8082";
 
 
             try
@@ -152,7 +152,7 @@ namespace Explorer.API.Controllers.Tourist.Encounters
         [HttpDelete("{id:int}")]
         public async Task<ActionResult> Delete(int id)
         {
-            var microserviceUrl = "http://localhost:8082";
+            var microserviceUrl = "http://encounters_server:8082";
             var requestUrl = $"{microserviceUrl}/executions/delete/{id}";
 
             try
@@ -195,7 +195,7 @@ namespace Explorer.API.Controllers.Tourist.Encounters
         [HttpGet("get-all-completed")]
         public async Task<ActionResult<List<EncounterExecutionDto>>> GetAllCompletedByTourist([FromQuery] int page, [FromQuery] int pageSize, [FromQuery] int touristId)
         {
-            var microserviceUrl = "http://localhost:8082"; // Adresa vašeg mikroservisa
+            var microserviceUrl = "http://encounters_server:8082"; // Adresa vašeg mikroservisa
 
             try
             {
@@ -250,7 +250,7 @@ namespace Explorer.API.Controllers.Tourist.Encounters
             return CreateResponse(result);
             */
 
-            var microserviceUrl = "http://localhost:8082";
+            var microserviceUrl = "http://encounters_server:8082";
 
             try
             {

@@ -63,7 +63,7 @@ namespace Explorer.API.Controllers.Author.Administration
 
             encounter.CheckPointId = checkpointId;
 
-            var microserviceUrl = "http://localhost:8082";
+            var microserviceUrl = "http://encounters_server:8082";
 
             try
             {
@@ -119,7 +119,7 @@ namespace Explorer.API.Controllers.Author.Administration
             return CreateResponse(result);
             */
             encounter.CheckPointId = chId;
-            var microserviceUrl = "http://localhost:8082";
+            var microserviceUrl = "http://encounters_server:8082";
 
             try
             {
@@ -160,7 +160,7 @@ namespace Explorer.API.Controllers.Author.Administration
         [Authorize(Policy = "touristPolicy")]
         public async Task<ActionResult> Delete(int id)
         {
-            var microserviceUrl = "http://localhost:8082";
+            var microserviceUrl = "http://encounters_server:8082";
             var requestUrl = $"{microserviceUrl}/encounters/delete/{id}";
 
             try
@@ -199,7 +199,7 @@ namespace Explorer.API.Controllers.Author.Administration
             return CreateResponse(result);
 
             */
-            var microserviceUrl = "http://localhost:8082";
+            var microserviceUrl = "http://encounters_server:8082";
             try
             {
                 // Napravite HTTP GET zahtjev ka mikroservisu za dobavljanje encounter-a po ID-u
@@ -240,7 +240,7 @@ namespace Explorer.API.Controllers.Author.Administration
 
             */
             EncounterDto retrievedEncounter = new EncounterDto();
-            var microserviceUrl = "http://localhost:8082";
+            var microserviceUrl = "http://encounters_server:8082";
             try
             {
                 // Napravite HTTP GET zahtjev ka mikroservisu za dobavljanje encounter-a po ID-u

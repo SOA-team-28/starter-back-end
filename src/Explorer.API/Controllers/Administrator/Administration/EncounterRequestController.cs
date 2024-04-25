@@ -43,7 +43,7 @@ namespace Explorer.API.Controllers.Administrator.Administration
             */
 
             List<EncounterRequestDto> requests = new List<EncounterRequestDto>();
-            var microserviceUrl = "http://localhost:8082";
+            var microserviceUrl = "http://encounters_server:8082";
             try
             {
                 // Napravite HTTP GET zahtjev ka mikroservisu za dobavljanje encounter-a po ID-u
@@ -80,7 +80,7 @@ namespace Explorer.API.Controllers.Administrator.Administration
             var result = _encounterRequestService.AcceptRequest(id);
             return CreateResponse(result);
             */
-            var microserviceUrl = "http://localhost:8082";
+            var microserviceUrl = "http://encounters_server:8082";
 
             try
             {
@@ -119,7 +119,7 @@ namespace Explorer.API.Controllers.Administrator.Administration
             var result = _encounterRequestService.RejectRequest(id);
             return CreateResponse(result);
             */
-            var microserviceUrl = "http://localhost:8082";
+            var microserviceUrl = "http://encounters_server:8082";
 
             try
             {

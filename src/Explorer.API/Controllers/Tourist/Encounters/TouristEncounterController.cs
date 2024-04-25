@@ -79,7 +79,7 @@ namespace Explorer.API.Controllers.Tourist.Encounters
 
                 encounter.Status = "Draft";
 
-                var microserviceUrl = "http://localhost:8082"; // Promijenite URL prema adresi vašeg mikroservisa
+                var microserviceUrl = "http://encounters_server:8082"; // Promijenite URL prema adresi vašeg mikroservisa
 
                 // Serijalizujte EncounterDto objekat u JSON format
                 var jsonContent = JsonConvert.SerializeObject(encounter);
@@ -147,7 +147,7 @@ namespace Explorer.API.Controllers.Tourist.Encounters
             */
             List < EncounterDto > retrievedEncounter = new List<EncounterDto>();
 
-            var microserviceUrl = "http://localhost:8082";
+            var microserviceUrl = "http://encounters_server:8082";
             try
             {
                 // Napravite HTTP GET zahtjev ka mikroservisu za dobavljanje encounter-a po ID-u
