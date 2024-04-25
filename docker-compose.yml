@@ -60,7 +60,7 @@ services:
     networks:
       - servers
     ports:
-      - "44333:44333"
+      - "8080:80"
     environment:
       DATABASE_HOST: database
       DATABASE_PORT: 5432
