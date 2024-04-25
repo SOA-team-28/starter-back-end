@@ -22,19 +22,19 @@ services:
       - "4002:5432"
 
   encounters_database:
-    image: postgres
-    container_name: postgres_encounters
+    image: mongo
+    container_name: mongo_encounters
     restart: always
     networks:
       - servers
     ports:
-      - 4001:5432
+      - 4001:27017
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: super
-      POSTGRES_DB: encounters
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+      MONGO_INITDB_DATABASE: encounters
     volumes:
-      - encounters_database_data:/var/lib/postgresql/data
+      - encounters_database_data:/data/db
 
   tours_database:
     image: postgres
